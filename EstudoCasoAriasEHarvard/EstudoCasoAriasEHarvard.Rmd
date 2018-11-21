@@ -19,3 +19,18 @@ knitr::opts_chunk$set(echo = TRUE)
 \tableofcontents
 \newpage
 
+# Pagamento de Empréstimo
+
+```{r include=FALSE}
+# Carrega as bibliotecas
+library(tidyverse)
+library(GGally)
+
+```
+
+```{r}
+read.csv2("./dados/pagamento_emprestimo.csv", stringsAsFactors = FALSE) -> pagamentoEmprestimo
+glm(data = pagamentoEmprestimo, formula = pagamento ~ estadocivil + idade + sexo, family = binomial) -> glmPagamento
+summary(glmPagamento)
+```
+
