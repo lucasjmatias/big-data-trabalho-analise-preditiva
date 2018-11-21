@@ -1,0 +1,21 @@
+---
+title: \Huge{Exploração de dados - Banco Czech}
+author:
+- \LARGE{Bruno Santos Wance de Souza}
+- \LARGE{Lucas de Jesus Matias}
+- \LARGE{Luiz Cesar Costa Raymundo}
+date: "21 de novembro de 2018"
+output:
+  pdf_document:
+    toc_depth: 2
+  word_document:
+    toc_depth: '2'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+\newpage
+\tableofcontents
+\newpage
+
