@@ -19,7 +19,6 @@ knitr::opts_chunk$set(echo = TRUE)
 \tableofcontents
 \newpage
 
-# Pagamento de Empréstimo
 
 ```{r include=FALSE}
 # Carrega as bibliotecas
@@ -28,21 +27,66 @@ library(GGally)
 
 ```
 
+# Pagamento de Empréstimo
+
+## Leitura dos dados
+Carregaremos os dados do csv gerado a partir da planilha para a variável "pagamentoEprestimo".
+
 ```{r}
-read.csv2("./dados/pagamento_emprestimo.csv", stringsAsFactors = FALSE) -> pagamentoEmprestimo
-glm(data = pagamentoEmprestimo, formula = pagamento ~ estadocivil + idade + sexo, family = binomial) -> glmPagamento
-summary(glmPagamento)
-#Os valores Ps das variáveis reijeitam a hipótese inicial de que são irrelevantes para o modelo, portanto consideramos todas as variáveis úteis.
-#Para testar o modelo, fazemos a predição
-glmprobs <- predict(glmPagamento, type="response")
-nLinhas <- nrow(pagamentoEmprestimo)
-glmpred <- rep(0, nLinhas)
-#Utilizaremos maior que 0,5 como sucesso no pagamento
-glmpred[ glmprobs > 0.5 ] <- 1
-
-#Comparando a predição com os dados que já conhecíamos, obtivemos 24 True Negatives, 125 True Positives, de um total de 180. Conseguímos prever os pagamentos com aproximadamente 82,8% de sucesso
-table(glmpred, pagamentoEmprestimo$pagamento)
-
+pagamentoEmprestimo <-
+    read.csv2("./dados/pagamento_emprestimo.csv", stringsAsFactors = FALSE)
 
 ```
 
+## Criação do modelo 
+Utilizaremos a funcionalidade glm para geração do modelo de regressão e vincularemos à variável glmPagamento.
+
+```{r}
+glm(data = pagamentoEmprestimo,
+    formula = pagamento ~ estadocivil + idade + sexo, family = binomial) -> 
+  glmPagamento
+
+```
+
+## Análise das variáveis
+Os valores Ps das variáveis reijeitam a hipótese inicial de que são irrelevantes para o modelo, portanto consideramos todas as variáveis úteis para a predição.
+```{r}
+summary(glmPagamento)
+```
+
+## Predição do modelo
+Para testar o modelo, realizamos a predição.
+```{r}
+glmprobsPagamento <- predict(glmPagamento, type="response")
+
+```
+
+Consideramos a predição acima de 0,5 como predição para o pagamento do empréstimo e menor ou igual a 0,5 como não pagamento.
+```{r}
+nLinhasPagamento <- nrow(pagamentoEmprestimo)
+glmpredPagamento <- rep(0, nLinhasPagamento)
+glmpredPagamento[ glmprobsPagamento > 0.5 ] <- 1
+
+```
+
+## Verificação da previsão
+Comparando a predição com os dados que já possuíamos, obtivemos 24 True Negatives, 125 True Positives, de um total de 180. Conseguímos prever os pagamentos com aproximadamente 82,8% de sucesso
+```{r}
+table(glmpredPagamento, pagamentoEmprestimo$pagamento)
+```
+
+
+## Conclusão
+O modelo gerado obteve um sucesso de 82,8% de sucesso sobre os dados que possuíamos.
+
+\newpage
+# Default de crédito
+
+## Leitura dos dados
+Carregaremos os dados do csv gerado a partir da planilha para a variável "defaultCredito".
+
+```{r}
+defaultCredito <-
+    read.csv2("./dados/default_de_credito.csv", stringsAsFactors = FALSE)
+
+```
