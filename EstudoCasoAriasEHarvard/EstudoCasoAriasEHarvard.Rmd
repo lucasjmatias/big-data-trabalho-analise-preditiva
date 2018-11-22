@@ -30,7 +30,7 @@ library(GGally)
 # Pagamento de Empréstimo
 
 ## Leitura dos dados
-Carregaremos os dados do csv gerado a partir da planilha para a variável "pagamentoEprestimo".
+Os dados do csv gerado a partir da planilha foram carregados para a variável "pagamentoEprestimo".
 
 ```{r}
 pagamentoEmprestimo <-
@@ -39,7 +39,7 @@ pagamentoEmprestimo <-
 ```
 
 ## Criação do modelo 
-Utilizaremos a funcionalidade glm para geração do modelo de regressão e vincularemos à variável glmPagamento.
+A funcionalidade glm foi utilizada para geração do modelo de regressão e este vinculado à variável glmPagamento.
 
 ```{r}
 glm(data = pagamentoEmprestimo,
@@ -49,19 +49,19 @@ glm(data = pagamentoEmprestimo,
 ```
 
 ## Análise das variáveis
-Os valores Ps das variáveis reijeitam a hipótese inicial de que são irrelevantes para o modelo, portanto consideramos todas as variáveis úteis para a predição.
+Os valores Ps das variáveis reijeitam a hipótese inicial de que são irrelevantes para o modelo, portanto foram consideradas úteis todas as variáveis para a predição.
 ```{r}
 summary(glmPagamento)
 ```
 
 ## Predição do modelo
-Para testar o modelo, realizamos a predição.
+Para testar o modelo, foi realizada a predição.
 ```{r}
 glmprobsPagamento <- predict(glmPagamento, type="response")
 
 ```
 
-Consideramos a predição acima de 0,5 como predição para o pagamento do empréstimo e menor ou igual a 0,5 como não pagamento. Foi testado pontos de corte menores e maiores, mas nenhum trouxe maior previsão que o ponto de corte 0,5.
+A predição acima de 0,5 foi considerada para o pagamento do empréstimo e menor ou igual a 0,5 como não pagamento. Foi testado pontos de corte menores e maiores, mas nenhum trouxe maior previsão que o ponto de corte 0,5.
 ```{r}
 nLinhasPagamento <- nrow(pagamentoEmprestimo)
 glmpredPagamento <- rep(0, nLinhasPagamento)
@@ -70,7 +70,7 @@ glmpredPagamento[ glmprobsPagamento > 0.5 ] <- 1
 ```
 
 ## Verificação da previsão
-Comparando a predição com os dados que já possuíamos, obtivemos 24 True Negatives, 125 True Positives, de um total de 180. Conseguímos prever os pagamentos com aproximadamente 82,8% de sucesso
+Aplicando a predição para os dados já possuídos, obtiveram-se 24 True Negatives, 125 True Positives, de um total de 180 registros. Os pagamentos forma previstos com aproximadamente 82,8% de sucesso.
 ```{r}
 table(glmpredPagamento, pagamentoEmprestimo$pagamento) -> tabelaPagamentoEmprestimo
 tabelaPagamentoEmprestimo
@@ -79,13 +79,13 @@ tabelaPagamentoEmprestimo
 
 
 ## Conclusão
-O modelo gerado obteve um sucesso de 82,8% de sucesso sobre os dados que possuíamos.
+O modelo gerado obteve um sucesso de previsão de 82,8% de sucesso sobre os dados já possuídos.
 
 \newpage
 # Default de crédito
 
 ## Leitura dos dados
-Carregaremos os dados do csv gerado a partir da planilha para a variável "defaultCredito".
+Os dados do csv gerado a partir da planilha foram carregados para a variável "defaultCredito".
 
 ```{r}
 defaultCredito <-
@@ -94,11 +94,13 @@ defaultCredito <-
 ```
 
 ## Criação do modelo 
-Utilizaremos a funcionalidade glm para geração do modelo de regressão e vincularemos à variável glmDefaultCredito
+A funcionalidade glm foi utilizada para a geração do modelo de regressão e este vinculado à variável glmDefaultCredito
 
 ```{r}
 glm(data = defaultCredito,
-    formula = default ~ idade + educacao + t_emprego + t_endereco + renda + divida + divida_cc + outras_div, family = binomial) -> 
+    formula = default ~ idade + educacao + t_emprego +
+                        t_endereco + renda + divida + divida_cc +
+                        outras_div, family = binomial) -> 
   glmDefaultCredito
 
 ```
@@ -121,13 +123,13 @@ summary(glmDefaultCredito)
 
 
 ## Predição do modelo
-Para testar o modelo, realizamos a predição.
+Para testar o modelo, foi criada a predição.
 ```{r}
 glmprobsDefaultCredito <- predict(glmDefaultCredito, type="response")
 
 ```
 
-Consideramos a predição acima de 0,5 como predição para positivo para a resposta e menor ou igual a 0,5 como negativo.
+A predição acima de 0,5 foi consierada como positiva para a resposta e menor ou igual a 0,5 como negativa.
 ```{r}
 nLinhasDefaultCredito <- nrow(defaultCredito)
 glmpredDefaultCredito <- rep(0, nLinhasDefaultCredito)
@@ -136,7 +138,7 @@ glmpredDefaultCredito[ glmprobsDefaultCredito > 0.5 ] <- 1
 ```
 
 ## Verificação da previsão
-Comparando a predição com os dados que já possuíamos, obtivemos 350 True Negatives, 60 True Positives, de um total de 500 Conseguímos prever os pagamentos com 82% de sucesso
+A predição foi comparada com os dados já possuídos, obtevem-se 350 True Negatives, 60 True Positives, de um total de 500. Foi possível prever os resultados com 82% de sucesso.
 ```{r}
 table(glmpredDefaultCredito, defaultCredito$default) -> tabelaDefaultCredito
 tabelaDefaultCredito
@@ -147,4 +149,4 @@ tabelaDefaultCredito
 
 
 ## Conclusão
-O modelo gerado obteve um sucesso de 82% de sucesso sobre os dados que possuíamos.
+O modelo gerado obteve um sucesso de previsão de 82% de sucesso sobre os dados já possuídos.
