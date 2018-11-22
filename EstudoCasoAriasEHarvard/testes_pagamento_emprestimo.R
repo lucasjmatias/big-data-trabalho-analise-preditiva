@@ -24,3 +24,20 @@ table(glmpred, pagamentoEmprestimo$pagamento)
 
 glmprobs
 ggpairs(data = pagamentoEmprestimo, ggplot2::aes(color=as.factor(pagamento)))
+
+
+table(glmpredPagamento, pagamentoEmprestimo$pagamento) -> tabela
+
+str(tabela)
+tabela$table
+
+glm(data = pagamentoEmprestimo,
+    formula = pagamento ~ estadocivil  , family = binomial) -> 
+  glmPagamento
+summary(glmPagamento)
+glmprobsPagamento <- predict(glmPagamento, type="response")
+nLinhasPagamento <- nrow(pagamentoEmprestimo)
+glmpredPagamento <- rep(0, nLinhasPagamento)
+glmpredPagamento[ glmprobsPagamento >= 0.5 ] <- 1
+table(glmpredPagamento, pagamentoEmprestimo$pagamento) -> tabela
+(as.vector(tabela)[1] + as.vector(tabela)[4]) / nLinhasPagamento
