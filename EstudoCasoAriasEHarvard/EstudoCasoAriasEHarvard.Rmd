@@ -32,5 +32,17 @@ library(GGally)
 read.csv2("./dados/pagamento_emprestimo.csv", stringsAsFactors = FALSE) -> pagamentoEmprestimo
 glm(data = pagamentoEmprestimo, formula = pagamento ~ estadocivil + idade + sexo, family = binomial) -> glmPagamento
 summary(glmPagamento)
+#Os valores Ps das variáveis reijeitam a hipótese inicial de que são irrelevantes para o modelo, portanto consideramos todas as variáveis úteis.
+#Para testar o modelo, fazemos a predição
+glmprobs <- predict(glmPagamento, type="response")
+nLinhas <- nrow(pagamentoEmprestimo)
+glmpred <- rep(0, nLinhas)
+#Utilizaremos maior que 0,5 como sucesso no pagamento
+glmpred[ glmprobs > 0.5 ] <- 1
+
+#Comparando a predição com os dados que já conhecíamos, obtivemos 24 True Negatives, 125 True Positives, de um total de 180. Conseguímos prever os pagamentos com aproximadamente 82,8% de sucesso
+table(glmpred, pagamentoEmprestimo$pagamento)
+
+
 ```
 
