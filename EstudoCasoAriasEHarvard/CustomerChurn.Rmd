@@ -61,7 +61,6 @@ glm(data = customerChurn,
 Para testar o modelo, foi realizada a predição.
 ```{r}
 glmprobsCostumer <- predict(glmCustomer, type="response")
-View(glmprobsCostumer)
 
 ```
 
