@@ -29,18 +29,23 @@ library(GGally)
 
 # Estudo de caso Customer Churn
 
+## Leitura dos dados
+Os dados do csv gerado a partir da planilha foram carregados para a variável "customerChurn".
 ```{r}
 customerChurn <-
   read.csv2("./dados/estudo_caso_customer_churn.csv", stringsAsFactors = FALSE)
 
 ```
+
+
 ## Preparação de variáveis
 O tempo de utilização dos serviços dos clientes foram segmentados de acordo com informações do cliente. Os clientes são considerados novos possuem menos de 6 meses de utilização dos serviços. Entre 6 meses e 14 foram considerados de maiores riscos.
 ```{r}
 customerChurn$clientes_novos <- 0
 customerChurn$clientes_novos[customerChurn$customer_age < 6] <- 1
 customerChurn$clientes_risco <- 0
-customerChurn$clientes_risco[customerChurn$customer_age > 6 & customerChurn$customer_age <= 14] <- 1
+customerChurn$clientes_risco[customerChurn$customer_age >= 6 &
+                             customerChurn$customer_age <= 17] <- 1
 ```
 
 

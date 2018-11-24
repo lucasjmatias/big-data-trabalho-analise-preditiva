@@ -18,18 +18,23 @@ customerChurn <-
 customerChurn$clientes_novos <- 0
 customerChurn$clientes_novos[customerChurn$customer_age < 6] <- 1
 customerChurn$clientes_risco <- 0
-customerChurn$clientes_risco[customerChurn$customer_age >= 6 &
-                             customerChurn$customer_age <= 17] <- 1
+customerChurn$clientes_risco[customerChurn$customer_age > 6 &
+                             customerChurn$customer_age <= 18] <- 1
+
 
 
 glm(data = customerChurn,
-    formula = churn ~ clientes_risco + support_cases_month_0 +  support_cases_0_1 + 
-      days_since_last_login_0_1 + chi_score_month_0  , family = binomial) -> 
+    formula = churn ~ clientes_risco + chi_score_month_0 + support_cases_month_0 +  
+      days_since_last_login_0_1 + support_cases_0_1   , family = binomial) -> 
         glmCustomer
 summary(glmCustomer)
 
-
+summary(glmCustomer)
+str(customerChurn)
 glmprobsCostumer <- predict(glmCustomer, type="response")
+
+# head(sort(glmprobsCostumer, decreasing = TRUE), 100)
+
 
 nLinhasCostumer <- nrow(customerChurn)
 glmpredCostumer <- rep(0, nLinhasCostumer)
@@ -50,7 +55,14 @@ sensitivity(tabelaCostumerChurn)
 specificity(tabelaCostumerChurn)
 
 
+customerChurn$probs = glmprobsCostumer
+head(order(customerChurn$probs, -probs), 100)
 
 
+head(customerChurn[order(-customerChurn$probs),], 100) -> clientesMaisProvaveisChurn
 
+View(cbind(clientesMaisProvaveis$id, clientesMaisProvaveis$probs))
 
+glmCustomer$coefficients
+
+customerChurn
