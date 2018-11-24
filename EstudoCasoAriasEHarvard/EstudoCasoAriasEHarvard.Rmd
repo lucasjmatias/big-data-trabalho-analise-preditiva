@@ -24,6 +24,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Carrega as bibliotecas
 library(tidyverse)
 library(GGally)
+library(caret)
+library(pROC)
+library(knitr)
 
 ```
 
@@ -61,7 +64,7 @@ glmprobsPagamento <- predict(glmPagamento, type="response")
 
 ```
 
-A predição acima de 0,5 foi considerada para o pagamento do empréstimo e menor ou igual a 0,5 como não pagamento. Foi testado pontos de corte menores e maiores, mas nenhum trouxe maior previsão que o ponto de corte 0,5.
+A predição acima de 0,5 foi considerada para o pagamento do empréstimo e menor ou igual a 0,5 como não pagamento. Foi testado pontos de corte menores e maiores, mas nenhum trouxe maior predição que o ponto de corte 0,5.
 ```{r}
 nLinhasPagamento <- nrow(pagamentoEmprestimo)
 glmpredPagamento <- rep(0, nLinhasPagamento)
@@ -69,7 +72,7 @@ glmpredPagamento[ glmprobsPagamento > 0.5 ] <- 1
 
 ```
 
-## Verificação da previsão
+## Verificação da predição
 Aplicando a predição para os dados já possuídos, obtiveram-se 24 True Negatives, 125 True Positives, de um total de 180 registros. Os pagamentos forma previstos com aproximadamente 82,8% de sucesso.
 ```{r}
 table(glmpredPagamento, pagamentoEmprestimo$pagamento) -> tabelaPagamentoEmprestimo
@@ -79,7 +82,7 @@ tabelaPagamentoEmprestimo
 
 
 ## Conclusão
-O modelo gerado obteve um sucesso de previsão de 82,8% de sucesso sobre os dados já possuídos.
+O modelo gerado obteve um sucesso de predição de 82,8% de sucesso sobre os dados já possuídos.
 
 \newpage
 # Default de crédito
@@ -137,7 +140,7 @@ glmpredDefaultCredito[ glmprobsDefaultCredito > 0.5 ] <- 1
 
 ```
 
-## Verificação da previsão
+## Verificação da predição
 A predição foi comparada com os dados já possuídos, obtevem-se 350 True Negatives, 60 True Positives, de um total de 500. Foi possível prever os resultados com 82% de sucesso.
 ```{r}
 table(glmpredDefaultCredito, defaultCredito$default) -> tabelaDefaultCredito
@@ -149,4 +152,110 @@ tabelaDefaultCredito
 
 
 ## Conclusão
-O modelo gerado obteve um sucesso de previsão de 82% de sucesso sobre os dados já possuídos.
+O modelo gerado obteve um sucesso de predição de 82% de sucesso sobre os dados já possuídos.
+
+\newpage
+# Estudo de caso Customer Churn
+
+## Leitura dos dados
+Os dados do csv gerado a partir da planilha foram carregados para a variável "customerChurn".
+```{r}
+customerChurn <-
+  read.csv2("./dados/estudo_caso_customer_churn.csv", stringsAsFactors = FALSE)
+
+```
+
+
+## Preparação de variáveis
+O tempo de utilização dos serviços dos clientes foram segmentados de acordo com informações do cliente. Os clientes são considerados novos possuem menos de 6 meses de utilização dos serviços. Entre 6 meses e 14 foram considerados de maiores riscos. Por algum motivo foi obtido melhores resultados classificando os grupo de clientes com risco até 18 meses.
+```{r}
+customerChurn$clientes_novos <- 0
+customerChurn$clientes_novos[customerChurn$customer_age < 6] <- 1
+customerChurn$clientes_risco <- 0
+customerChurn$clientes_risco[customerChurn$customer_age > 6 &
+                             customerChurn$customer_age <= 18] <- 1
+```
+
+
+## Criação do modelo 
+A funcionalidade glm foi utilizada para geração do modelo de regressão e este vinculado à variável glmCustomer. Removendo as variáveis não relevantes ao modelo, uma a uma, e reexecutando o modelo após a retirada de cada uma foi possível chegar a um modelo com variáveis relevantes. Foi feito alguns testes de remoção e adição de variáveis, respeitando o valor P, de forma que otimizasse a predição e chegamos ao seguinte modelo:
+
+```{r}
+glm(data = customerChurn,
+    formula = churn ~ clientes_risco + chi_score_month_0 + support_cases_month_0 +  
+      days_since_last_login_0_1 + support_cases_0_1   , family = binomial) -> 
+        glmCustomer
+
+```
+
+
+## Predição do modelo
+Para testar o modelo, foi realizada a predição.
+```{r}
+glmprobsCostumer <- predict(glmCustomer, type="response")
+
+```
+
+Para definir o ponto de corte foi utilizado o algoritmo de curvas ROC(Receiving Operating Characteristc), pelo método youden. A metodologia busca um maior resultado possível para a sensitividade e especificidade.
+```{r}
+rocobj <- roc(customerChurn$churn, glmprobsCostumer)
+coords(rocobj, x="best", input="threshold", best.method="youden")[1] -> pontoCorte
+pontoCorte
+
+```
+
+Com o ponto de corte definido, podemos preparar a predição. 
+```{r}
+nLinhasCostumer <- nrow(customerChurn)
+glmpredCostumer <- rep(0, nLinhasCostumer)
+glmpredCostumer[ glmprobsCostumer > pontoCorte ] <- 1
+
+```
+
+
+## Verificação da predição
+Aplicando a predição para os dados já possuídos, obtiveram-se 4213 True Negatives, 212 True Positives, de um total de 6347 registros. Os pagamentos forma previstos com aproximadamente 69,7% de sucesso (sensitividade) e 65,6% de especificidade . Como a probabilidade de churn é bem pequena, cerca de 5%, é importante que a especificidade esteja alta também, pois é possível conseguir uma alta taxa de sucesso de predição se o ponto de corte for acima do ideal, mas a especificidade é prejudicada e a predição não traria informações úteis.
+```{r}
+dadosReais <- customerChurn$churn
+table(glmpredCostumer, dadosReais) -> tabelaCostumerChurn
+tabelaCostumerChurn
+
+(as.vector(tabelaCostumerChurn)[1] + as.vector(tabelaCostumerChurn)[4]) / nLinhasCostumer
+
+quantChurns = nrow(customerChurn[customerChurn$churn==1,])
+#Percentual de Churns presentes nos nossos dados:
+quantChurns/nLinhasCostumer
+
+sensitivity(tabelaCostumerChurn)
+specificity(tabelaCostumerChurn)
+```
+
+
+## Conclusão
+A partir do modelo foi possível gerar a probabilidade de cada cliente deixar o serviço. 
+Os parâmetros utilizados foram:
+
+- **cliente_risco**: Variável binária, onde 0 = falso e 1 = verdadeiro, que representa a presença do cliente no grupo de clientes acima de 6 meses de contrato até 18. Têm um peso relevante em aumento de chance de churn caso verdadeiro.
+
+- **chi_score_mont_0**: Representa o Chi-score em dezembro. Quanto maior, menor a chance de churn.
+- **support_cases_month_0**: Representa a quantidade de casos abertos no mês de dezembro. Quanto maior, menor a chance, o que pode indicar que clientes que utilizam mais o serviço, abrem mais chamados e cancelam menos.
+- **days_since_last_login_0_1**: Representa a diferença entre os dias desde o último login enter o mês de dezembro e novembro. O valor negativo significa que em dezembro os dias foram menores que de dezembro. Então uma quantidade maior aumenta as chances de churn.
+- **support_cases_0_1**: Representa a diferença dos suportes abertos entre dezembro e novembro. O valor negativo significa que em dezembro a abertura de suportes foi inferior a novembro. Então uma quantidade maior aumenta as chances de churn. 
+
+```{r echo=FALSE}
+glmCustomer$coefficients
+
+```
+
+Acrescentamos também se os clientes realmente deixaram o serviço, coluna "churn", visto que estamos aplicando para os dados já conhecidos. 
+
+```{r}
+customerChurn$probs = glmprobsCostumer
+head(customerChurn[order(-customerChurn$probs),], 100) -> clientesMaisProvaveis
+
+select(clientesMaisProvaveis, id, probs, churn) %>%
+  mutate(id = id) %>%
+  kable(caption = "Lista clientes mais prováveis - Churn")
+
+```
+

@@ -29,21 +29,21 @@ glm(data = customerChurn,
         glmCustomer
 summary(glmCustomer)
 
-summary(glmCustomer)
-str(customerChurn)
 glmprobsCostumer <- predict(glmCustomer, type="response")
 
 # head(sort(glmprobsCostumer, decreasing = TRUE), 100)
 
 
-nLinhasCostumer <- nrow(customerChurn)
-glmpredCostumer <- rep(0, nLinhasCostumer)
 
 rocobj <- roc(customerChurn$churn, glmprobsCostumer)
 coords(rocobj, x="best", input="threshold", best.method="youden")[1] -> pontoCorte
 pontoCorte
 
+nLinhasCostumer <- nrow(customerChurn)
+glmpredCostumer <- rep(0, nLinhasCostumer)
 glmpredCostumer[ glmprobsCostumer > pontoCorte ] <- 1
+
+
 dadosReais <- customerChurn$churn
 table(glmpredCostumer, dadosReais) -> tabelaCostumerChurn
 tabelaCostumerChurn
@@ -53,6 +53,7 @@ mean(customerChurn$churn == glmpredCostumer)
 
 sensitivity(tabelaCostumerChurn)
 specificity(tabelaCostumerChurn)
+?specificity
 
 
 customerChurn$probs = glmprobsCostumer
@@ -60,8 +61,8 @@ head(order(customerChurn$probs, -probs), 100)
 
 
 head(customerChurn[order(-customerChurn$probs),], 100) -> clientesMaisProvaveisChurn
+cbind(clientesMaisProvaveis$id, clientesMaisProvaveis$probs) -> listaFinal
 
-View(cbind(clientesMaisProvaveis$id, clientesMaisProvaveis$probs))
 
 glmCustomer$coefficients
 
