@@ -1,5 +1,5 @@
 ---
-title: \Huge{Exploração de dados - Banco Czech}
+title: \Huge{Análise preditiva - Trabalho final}
 author:
 - \LARGE{Bruno Santos Wance de Souza}
 - \LARGE{Lucas de Jesus Matias}
